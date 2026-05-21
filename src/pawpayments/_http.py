@@ -5,8 +5,7 @@ import json
 from typing import Any, Optional
 
 from .errors import PawPaymentsApiError
-
-DEFAULT_USER_AGENT = "pawpayments-python-sdk/0.1.0"
+from ._version import DEFAULT_USER_AGENT
 
 
 def base_headers(api_key: str, uniq_id: Optional[str] = None) -> dict[str, str]:

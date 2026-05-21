@@ -67,6 +67,8 @@ asyncio.run(main())
 `payouts.create` and `payouts.batch` accept an optional `uniq_id` for explicit
 idempotency (UUIDv4). When omitted the SDK generates one with `uuid.uuid4()`.
 A repeated `uniq_id` within 2 hours yields a 409.
+Payout requests use `address`. Invoice responses expose `address_to` and may
+include `address_from`.
 
 ## Webhook verification
 
