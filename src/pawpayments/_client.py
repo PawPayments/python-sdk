@@ -47,9 +47,20 @@ class _Invoices(_Resource):
 
 class _Payouts(_Resource):
     def create(self, *, uniq_id: Optional[str] = None, **params: Any) -> dict[str, Any]:
+        """Create a single payout.
+
+        Accepts ``address``, ``amount``, ``fiat_currency``, ``asset`` and the
+        optional ``ref``. Pass ``fee_bearer="merchant"`` or ``"client"`` to
+        choose who covers the network fee (defaults to ``"merchant"``).
+        """
         return self._client._dispatch(R.payouts_create(params, uniq_id=uniq_id))
 
     def batch(self, items: list[Mapping[str, Any]], *, uniq_id: Optional[str] = None) -> dict[str, Any]:
+        """Create up to 200 payouts at once.
+
+        Each item accepts the same fields as :meth:`create`, including the
+        optional ``fee_bearer`` (``"merchant"`` | ``"client"``).
+        """
         return self._client._dispatch(R.payouts_batch(items, uniq_id=uniq_id))
 
     def get(self, payout_id: str) -> dict[str, Any]:

@@ -70,6 +70,20 @@ A repeated `uniq_id` within 2 hours yields a 409.
 Payout requests use `address`. Invoice responses expose `address_to` and may
 include `address_from`.
 
+Each payout (and each batch item) accepts an optional `fee_bearer` of
+`"merchant"` or `"client"` to choose who covers the network fee — defaults to
+`"merchant"`:
+
+```python
+paw.payouts.create(
+    address="T…",
+    amount=50,
+    fiat_currency="USD",
+    asset="usdt_tron",
+    fee_bearer="client",
+)
+```
+
 ## Webhook verification
 
 ```python
