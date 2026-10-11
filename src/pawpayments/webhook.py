@@ -4,16 +4,13 @@ import hashlib
 import hmac
 import json
 import re
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any, Mapping, Optional, Union
 
 _BodyT = Union[str, bytes, bytearray, memoryview]
 
 # Hex-encoded HMAC-SHA256 digest, exactly as the gateway sends it.
 _SIGNATURE_RE = re.compile(r"[0-9a-fA-F]{64}")
-
-# Rounding of the fiat amounts on either side.
-_CENT = Decimal("0.01")
 
 
 def _to_bytes(body: _BodyT) -> bytes:
@@ -31,6 +28,11 @@ def _to_decimal(value: Any) -> Optional[Decimal]:
     except (InvalidOperation, ValueError):
         return None
     return number if number.is_finite() else None
+
+
+def _cents(amount: Decimal) -> int:
+    """A fiat amount in whole cents, the unit the SDKs compare in."""
+    return int((amount * 100).to_integral_value(rounding=ROUND_HALF_UP))
 
 
 class Webhook:
@@ -82,4 +84,6 @@ class Webhook:
         expected = _to_decimal(total)
         if issued is None or expected is None:
             return False
-        return issued >= expected - _CENT
+        # In whole cents, as the PHP and Node SDKs do (they work in binary
+        # floats). One cent absorbs rounding of the fiat amounts on either side.
+        return _cents(issued) >= _cents(expected) - 1

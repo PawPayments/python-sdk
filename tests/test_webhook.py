@@ -134,6 +134,19 @@ def test_covers_amount_allows_only_a_cent_of_rounding():
     assert Webhook.covers_amount({"initial_fiat_amount": 120, "fiat_currency": "USD"}, "USD", 100)
 
 
+def test_covers_amount_counts_the_cent_exactly_for_every_amount():
+    # Floats as json.loads delivers them; the PHP and Node SDKs had to move to
+    # whole cents because 2.02 - 0.01 is a hair above 2.01 in binary.
+    assert Webhook.covers_amount({"initial_fiat_amount": 2.01, "fiat_currency": "USD"}, "USD", 2.02)
+    wrong = [
+        cents / 100
+        for cents in range(2, 100001)
+        if not Webhook.covers_amount({"initial_fiat_amount": (cents - 1) / 100, "fiat_currency": "USD"}, "USD", cents / 100)
+        or Webhook.covers_amount({"initial_fiat_amount": (cents - 2) / 100, "fiat_currency": "USD"}, "USD", cents / 100)
+    ]
+    assert wrong == []
+
+
 def test_covers_amount_refuses_another_or_a_missing_currency():
     assert not Webhook.covers_amount({"initial_fiat_amount": 100000, "fiat_currency": "IDR"}, "USD", 100)
     assert not Webhook.covers_amount({"initial_fiat_amount": 100}, "USD", 100)
